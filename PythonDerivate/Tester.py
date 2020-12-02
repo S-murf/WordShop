@@ -11,7 +11,14 @@ def main():
     mapp = Mapper()
     k = mapp.maptolist("pokemon is a really fun game uwu.", objA)
     l = allit.evaluate(k, objA)
-    print(l)
+
+    testingincrement = 0
+    for t in l:
+        print("List #" + str(testingincrement))
+        print(t)
+        print("\n")
+        testingincrement += 1
+
     return
 
 if __name__ == "__main__":

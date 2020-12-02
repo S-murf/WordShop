@@ -15,6 +15,8 @@ class AmericanEnglishLangContext(LanguageBoundsInterface):
         PREP = 4
 
     def similarity(self, arg1, arg2):
+        """"""
+        # word length, similarity, grammatical usage
         return 1
 
     def split(self, arg):
