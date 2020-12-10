@@ -1,3 +1,4 @@
+from nltk.corpus import cmudict
 from nltk.corpus import wordnet
 from nltk.wsd import lesk
 from Interfaces.rulebounds import RuleBoundsInterface
@@ -5,32 +6,159 @@ from Interfaces.rulebounds import RuleBoundsInterface
 class AlliterationRuleContext(RuleBoundsInterface):
     """Defines the properties and rules of the alliteration rhetorical figure."""
 
-    def _applyrule(self, sourcetoken, tokenlist):
+    ########## Variables ##########
+
+    _bannedphenomes = ["AA", "E"] # Contains all phenomes that should not be evaluated because they violate the rules of alliteration.
+    _cmu = cmudict.dict() # Pretrained phenome generation model. Created outside of methods because it is used over iteration(s) and is expensive to generate; TREAT THIS VALUE AS AN IMMUTABLE.
+    _MULTI_TOKEN_INDICATOR = "_" # Character used to identify when a token has multiple words. This functionality is specific to Wordnet. If Wordnet implementation changes, this code must be changed.
+    _NULL_PHENOME_INDICATOR = "*NONE*" # Used by algorithm to indicate if a corressponding phemone could not be found for a token
+
+    ###############################
+
+    def _applyrule(self, sourcedata, tokentargetcount):
         """Trim interal-map token list to only retain tokens that constrain to the alliteration ruleset."""
-        return tokenlist
 
-    def _getrelevantsynonyms(self, sourcetoken):
-        """Returns a list of synonyms that are relevant to the allieration rule context."""
+        phenomeselect = []
+        for phenomeset in sourcedata:
+            if phenomeset not in self._bannedphenomes:
+                #run proportion algorithm
+                setrep = sourcedata[phenomeset]
+                if tokentargetcount <= len(setrep):
+                    phenomeselect.append(sourcedata[phenomeset])
 
-        relevant = []
-        if sourcetoken is not None:
-            relevant.append(sourcetoken)
-            relevant.append(sourcetoken.hypernyms())
-            relevant.append(sourcetoken.hyponyms())
+        # Return selection
+        if not phenomeselect:
+            return None
+        else:
+            return phenomeselect
+
+    def _applyscan(self, sourcematrix):
+        """Scan a token-matrix and return a dataset that holds information on the phenome frequency of alliteration
+        in the matrix."""
+
+        dataset = {} # Dicitonary is of type 'char' -> dict{int -> list[str]}'
+
+        for index, item in enumerate(sourcematrix): # going through each token
+            for content in item: # going through synonym content of each token
+
+                phenomelists = self._getsourcephenome(content) # generate phenomes for alliteration evaluation
+                for phenomes in phenomelists: # going through each phenome list for token (some tokes may have multiple pronounciations)
+
+                    relevantphenome = phenomes[0] # use the FIRST phenome because this is alliteration
+
+                    if dataset.get(relevantphenome, None) is None: # if letter has NOT been scanned previously, create an entry
+                       dataset[ relevantphenome ] = {} # Dictionary will contain key-value pairs corresponding to the index and the list of words available.
+                       dataset[ relevantphenome ] [index] = [content]
+
+                    else:
+                        if dataset[ relevantphenome ].get(index, None) is None: # if an entry for THIS index has NOT been created, create one.
+                            dataset[ relevantphenome ] [index] = [content]
+                        else:
+                            if content not in dataset[ relevantphenome ] [index]:
+                                dataset[ relevantphenome ] [index].append(content)
+                                
+        return dataset
+
+    def _getproperformattype(self, unformattoken):
+        """Used to parse through the Wordnet sysnet-token return value to retrieve only relevant sections. Currently the only returns the word.
+        In future implementations, this function may not be needed if the corpus has a function to return only the word as a string."""
+
+        name, junk = unformattoken.name().split(".", 1);
+        return name
+
+    def _getproperhandlemissingphenome(self, unknowntoken):
+        """Takes a unknown-phenome (a token which could not be evaluated by CMUdict) and attempts to generate a phenome. If CMUdict or
+        Wordnet implementation is changed this function MUST be changed."""
+
+        finaleval = []
+
+        # After various testing, it has been determined that calculating for two letters yields the most consistent results for unknown phenomes.
+        tokenlen = len(unknowntoken)
+        if tokenlen is 0:
+            finaleval.append([self._NULL_PHENOME_INDICATOR])
+        elif tokenlen is 1:
+            finaleval.append([unknowntoken.upper()]) # The letter IS the phenome
+        else:
+            relevant = unknowntoken[:2] # get first two chars
+            finalattempt = self._cmu.get(relevant, None)
+
+            if finalattempt is None: # No possible phenome can be generated by this algorithm
+                finaleval.append([self._NULL_PHENOME_INDICATOR])
+            elif finalattempt is list:
+                finaleval.append(finalattempt)
+            else:  # 'finalattempt' is guareenteed to only be of type NONE, list, or list[list].
+                finaleval.extend(finalattempt) # flatten list; tis step is necessary to maintain parsability
+
+        return finaleval
+
+    def _getproperhandlemultitoken(self, multitoken):
+        """Takes a multi-word (a token with words seperated by '_' by Wordnet) and breaks it down into a format that can be evaluated by the CMUdict. If CMUdict or
+        Wordnet implementation is changed this function MUST be changed."""
+
+        finaleval = []
+        individualtokens = multitoken.split(self._MULTI_TOKEN_INDICATOR)
+
+        for token in individualtokens: # evaluate each token phenome indiviually; then represent multitoken for EACH phenome calculated, when returned to scanning.
+            phenome = self._cmu.get(token.lower(), None)
+               
+            if phenome is list:
+                finaleval.append(phenome)
+
+            else: # 'phenome' is guareenteed to only be of type NONE, list, or list[list].
+                if phenome is None:
+                    phenome = self._getproperhandlemissingphenome(token)
+                    
+                finaleval.extend(phenome) # flatten list; this step is necessary to maintain parsability
+
+        return finaleval
+
+    def _getsourcephenome(self, evaltoken):
+        """Returns a phenome value for a string-token using CMUdict as the core processing algorithm. If CMUdict fails to find a match
+        the function will predict a possible phenome for the token. This function is guareenteed to return a value."""
+
+        generatephenome = self._cmu.get(evaltoken.lower(), None) # _cmu is defined globally above in "VARIABLES" section. Treat as an immutable.
+        if generatephenome is None:
+            if evaltoken.__contains__(self._MULTI_TOKEN_INDICATOR): # _MULTI_TOKEN_INDICATOR is defined globally above in "VARIABLES" section. Treat as an immutable.
+                generatephenome = self._getproperhandlemultitoken(evaltoken)
+
+            else: # token is unknown by CMUdict
+                generatephenome = self._getproperhandlemissingphenome(evaltoken)
+
+        # When multiple phenomes exist for same word, a list[list[str]] is generated
+        return generatephenome
+
+
+    def _getrelevantsynonyms(self, tokenlist, sourcetoken):
+        """Returns a token-list of+ the original context and synonyms that are relevant, if applicable."""
+
+        relevant = [sourcetoken] # original token is always first within the collection
+        context = lesk(tokenlist, sourcetoken)
+
+        if context is not None: # Add all relevant synonyms to evaluation list as strings
+            relevant.extend(map(self._getproperformattype, context.hypernyms()))
+            relevant.extend(map(self._getproperformattype, context.hyponyms()))
 
         return relevant
 
     def _internalmap(self, tokenlist):
-        """Map relevant replacement tokens to list. This return token list will have a one-to-to corresspondence to the passed tokenlist argument."""
+        """Map relevant replacement tokens to a matrix. This return token-matrix will have a one-to-to corresspondence
+        to the passed tokenlist argument."""
 
         replacements = []
         for token in tokenlist:
-            context = lesk(tokenlist, token)
-            similar = self._getrelevantsynonyms(context)
-            ruleapplied = self._applyrule("a", similar)
-            replacements.append(ruleapplied)
+            similar = self._getrelevantsynonyms(tokenlist, token)
+            replacements.append(similar)
 
         return replacements
 
-    def evaluate(self, tokenlist, langbound):
-        return self._internalmap(tokenlist)
+    def evaluate(self, tokenlist, replacementquota):
+        if replacementquota < 2: # Nothing will be applied to the target list. Do not process.
+            return None
+
+        # Map and chart data for rule application
+        preprocess = self._internalmap(tokenlist)
+        process = self._applyscan(preprocess)
+
+        # Apply rule and return data
+        postprocess = self._applyrule(process, replacementquota)
+        return postprocess

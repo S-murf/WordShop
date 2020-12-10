@@ -3,9 +3,8 @@ class RuleBoundsInterface:
 These properties will create a ruleset for a rhectorical figure, allowing the algorithm to produce results relevant
 to the user-request."""
 
-    def evaluate(self, tokenlist, langbound):
-        """Returns a key-value pair of an 'application-score' (a score that shows to which degree a rhetorical figure can be applied;
-        scales from 0 to 1) and a 2D-list of potential replacements per relevant phrase (where 'phrase' is defined as an individual word OR
-        sequence of words)"""
+    def evaluate(self, tokenlist, replacementquota):
+        """Returns a dataset containing the best application of the rule to the original tokenlist using the proportion specified. This also means
+        that certain conditions will have no return value."""
         pass
 
