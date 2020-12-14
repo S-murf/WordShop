@@ -6,20 +6,24 @@ can work in the given context."""
     # In future implementations, this is where hypernyms/hyponyms/phenomes/similarity/token-spliting/unknown-handling will be handled.
     # Makes it so rule implementation can use any language can use rule implementation modularly. As of right now, English is the only supported language.
 
+    ########## Variables ##########
+
+    vowelphenomes = None # Contains all phenomes that produce vowel-related sounds for this language.
+    MULTI_TOKEN_INDICATOR = None # Character used to identify when a token has multiple words. This functionality is specific to a corpus. Must be changed if corpus is changed.
+    _NULL_PHENOME_INDICATOR = None # Phenome representation of an unknown phenome
+
+    ###############################
+
     def getphenomes(self, arg):
         """Returns all phenome-lists related to the token."""
         pass
 
     def hypernyms(self, arg):
-        """Returns all hypernyms related to the token."""
+        """Returns all hypernyms related to the token. ('context' is the representation of the phrase in collection form.)"""
         pass
 
-    def hyopnyms(self, arg):
-        """Returns all hyponyms related to the token."""
-        pass
-
-    def leskequivalent(self, origin, arg):
-        """Returns the context related to the token."""
+    def hyponyms(self, arg):
+        """Returns all hyponyms related to the token. ('context' is the representation of the phrase in collection form.)"""
         pass
 
     def messagefail(self, input):
