@@ -48,8 +48,7 @@ class AlliterationRuleContext(RuleBoundsInterface):
         return dataset
 
     def _getsourcephenome(self, evaltoken, langbound):
-        """Returns a phenome value for a string-token using CMUdict as the core processing algorithm. If CMUdict fails to find a match
-        the function will predict a possible phenome for the token. This function is guareenteed to return a value."""
+        """Returns a phenome value for a string-token."""
 
         phenomeform = langbound.getphenomes(evaltoken)
         return phenomeform

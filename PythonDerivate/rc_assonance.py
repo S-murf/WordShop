@@ -1,10 +1,10 @@
 from Interfaces.rulebounds import RuleBoundsInterface
 
 class AssonanceRuleContext(RuleBoundsInterface):
-    """Defines the properties and rules of the alliteration rhetorical figure."""
+    """Defines the properties and rules of the assonance rhetorical figure."""
 
     def _applyrule(self, sourcedata, tokentargetcount, langbound):
-        """Trim interal-map token list to only retain tokens that constrain to the alliteration ruleset."""
+        """Trim interal-map token list to only retain tokens that constrain to the assonance ruleset."""
 
         phenomeselect = []
         for phenomeset in sourcedata:
@@ -21,7 +21,7 @@ class AssonanceRuleContext(RuleBoundsInterface):
             return phenomeselect
 
     def _applyscan(self, sourcematrix, langbound):
-        """Scan a token-matrix and return a dataset that holds information on the phenome frequency of alliteration
+        """Scan a token-matrix and return a dataset that holds information on the phenome frequency of assonance
         in the matrix."""
 
         dataset = {} # Dicitonary is of type 'char' -> dict{int -> list[str]}'
@@ -32,7 +32,7 @@ class AssonanceRuleContext(RuleBoundsInterface):
                 phenomelists = self._getsourcephenome(content, langbound) # generate phenomes for alliteration evaluation
                 for phenomes in phenomelists: # going through each phenome list for token (some tokes may have multiple pronounciations)
 
-                    relevantphenome = phenomes[0] # use the FIRST phenome because this is alliteration
+                    relevantphenome = phenomes[0] # use the FIRST phenome because this is assonance
 
                     if dataset.get(relevantphenome, None) is None: # if letter has NOT been scanned previously, create an entry
                        dataset[ relevantphenome ] = {} # Dictionary will contain key-value pairs corresponding to the index and the list of words available.
@@ -48,8 +48,7 @@ class AssonanceRuleContext(RuleBoundsInterface):
         return dataset
 
     def _getsourcephenome(self, evaltoken, langbound):
-        """Returns a phenome value for a string-token using CMUdict as the core processing algorithm. If CMUdict fails to find a match
-        the function will predict a possible phenome for the token. This function is guareenteed to return a value."""
+        """Returns a phenome value for a string-token."""
 
         phenomeform = langbound.getphenomes(evaltoken)
         return phenomeform

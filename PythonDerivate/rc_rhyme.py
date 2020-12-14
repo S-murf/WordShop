@@ -1,10 +1,10 @@
 from Interfaces.rulebounds import RuleBoundsInterface
 
 class RhymeRuleContext(RuleBoundsInterface):
-    """Defines the properties and rules of the alliteration rhetorical figure."""
+    """Defines the properties and rules of the rhyme rhetorical figure."""
 
     def _applyrule(self, sourcedata, tokentargetcount, langbound):
-        """Trim interal-map token list to only retain tokens that constrain to the alliteration ruleset."""
+        """Trim interal-map token list to only retain tokens that constrain to the rhyme ruleset."""
 
         phenomeselect = []
         for phenomeset in sourcedata:
@@ -20,7 +20,7 @@ class RhymeRuleContext(RuleBoundsInterface):
             return phenomeselect
 
     def _applyscan(self, sourcematrix, langbound):
-        """Scan a token-matrix and return a dataset that holds information on the phenome frequency of alliteration
+        """Scan a token-matrix and return a dataset that holds information on the phenome frequency of rhyme
         in the matrix."""
 
         dataset = {} # Dicitonary is of type 'char' -> dict{int -> list[str]}'
@@ -47,8 +47,7 @@ class RhymeRuleContext(RuleBoundsInterface):
         return dataset
 
     def _getsourcephenome(self, evaltoken, langbound):
-        """Returns a phenome value for a string-token using CMUdict as the core processing algorithm. If CMUdict fails to find a match
-        the function will predict a possible phenome for the token. This function is guareenteed to return a value."""
+        """Returns a phenome value for a string-token."""
 
         phenomeform = langbound.getphenomes(evaltoken)
         return phenomeform

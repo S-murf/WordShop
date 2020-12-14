@@ -76,6 +76,9 @@ class AmericanEnglishLangContext(LanguageBoundsInterface):
     def getphenomes(self, arg):
         """Returns all phenome-lists related to the token. ('context' is the representation of the phrase in collection form.)"""
 
+        # uses CMUdict as the core processing algorithm. If CMUdict fails to find a match the function will predict a possible phenome for the token.
+        # This function is guareenteed to return a value.
+
         generatephenome = self._cmu.get(arg.lower(), None) # _cmu is defined globally above in "VARIABLES" section. Treat as an immutable.
         if generatephenome is None:
             if arg.__contains__(self._MULTI_TOKEN_INDICATOR): # _MULTI_TOKEN_INDICATOR is defined globally above in "VARIABLES" section. Treat as an immutable.
