@@ -3,16 +3,21 @@ class LanguageBoundsInterface:
 These properties will create a ruleset for a language, which will be the bounds an algorithm
 can work in the given context."""
 
-    # In future implementations, this is where hypernyms/hyponyms/phenomes/similarity/token-spliting/unknown-handling will be handled.
-    # Makes it so rule implementation can use any language can use rule implementation modularly. As of right now, English is the only supported language.
-
     ########## Variables ##########
 
-    vowelphenomes = None # Contains all phenomes that produce vowel-related sounds for this language.
-    MULTI_TOKEN_INDICATOR = None # Character used to identify when a token has multiple words. This functionality is specific to a corpus. Must be changed if corpus is changed.
     _NULL_PHENOME_INDICATOR = None # Phenome representation of an unknown phenome
-
+    _SIMILARITY_THRESHOLD = 0.2 # The threshold that must be passed for a word to be considered similar. Scaled from 0-1.
+    MULTI_TOKEN_INDICATOR = None # Character used to identify when a token has multiple words. This functionality is specific to a corpus. Must be changed if corpus is changed.
+    vowelphenomes = None # Contains all phenomes that produce vowel-related sounds for this language.
+    
     ###############################
+
+    ########## Constructor ##########
+
+    def __init__(self, sensitivity):
+        self._SIMILARITY_THRESHOLD = sensitivity
+
+    #################################
 
     def getphenomes(self, arg):
         """Returns all phenome-lists related to the token."""

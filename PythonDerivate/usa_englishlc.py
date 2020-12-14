@@ -19,6 +19,7 @@ class AmericanEnglishLangContext(LanguageBoundsInterface):
                     "IX", "IY", "OW", "OY","UH", "UW", "UX"] # Contains all phenomes that produce vowel-related sounds for this language.
     
     ###############################
+
     def _getproperformattype(self, unformattoken):
         """Used to parse through the Wordnet sysnet-token return value to retrieve only relevant sections. Currently the only returns the word.
         In future implementations, this function may not be needed if the corpus has a function to return only the word as a string."""

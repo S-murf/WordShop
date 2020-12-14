@@ -16,8 +16,8 @@ from Modules.Map.mapper import Mapper
 def main():
     return
 
-def alliteration(arg, proportion):
-    langcontext = AmericanEnglishLangContext()
+def alliteration(arg, proportion, sensitivity):
+    langcontext = AmericanEnglishLangContext(sensitivity)
     mapsection = Mapper()
     rule = AlliterationRuleContext()
     interpreter = Analyzer()
@@ -29,7 +29,7 @@ def alliteration(arg, proportion):
         calcd *= proportion
         calcd = round(calcd)
 
-    applied = rule.evaluate(mappedtokens, calcd)
+    applied = rule.evaluate(mappedtokens, calcd, langcontext)
     finalresult = interpreter.analyze(mappedtokens, applied, langcontext, calcd)
     print(finalresult)
 

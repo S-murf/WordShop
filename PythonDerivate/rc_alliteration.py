@@ -1,6 +1,3 @@
-from nltk.corpus import cmudict
-from nltk.corpus import wordnet
-from nltk.wsd import lesk
 from Interfaces.rulebounds import RuleBoundsInterface
 
 class AlliterationRuleContext(RuleBoundsInterface):
@@ -47,9 +44,7 @@ class AlliterationRuleContext(RuleBoundsInterface):
                         else:
                             if content not in dataset[ relevantphenome ] [index]:
                                 dataset[ relevantphenome ] [index].append(content)
-
-
-        print(dataset)                        
+                                
         return dataset
 
     def _getsourcephenome(self, evaltoken, langbound):
